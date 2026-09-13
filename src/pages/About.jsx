@@ -1,4 +1,4 @@
-import { ArrowLeft, Cloud, Code2, ExternalLink, Globe, RadioTower, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowLeft, Cloud, Code2, RadioTower, ShieldCheck, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useI18n } from '../contexts/I18nContext';
@@ -42,15 +42,6 @@ export default function About() {
             {t('about_who')}
           </h2>
           <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{t('about_who_body')}</p>
-          <a
-            href="https://github.com/arctan303/FlareTools"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--accent)] underline decoration-[var(--line-strong)] underline-offset-4 hover:decoration-[var(--accent)]"
-          >
-            GitHub Repository
-            <ExternalLink className="size-3.5" aria-hidden="true" />
-          </a>
         </section>
 
         <section>
@@ -81,20 +72,9 @@ export default function About() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 py-10 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-brand text-xl font-semibold text-[var(--text-strong)]">{t('about_contact')}</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">{t('about_contact_desc')}</p>
-        </div>
-        <a
-          href="https://github.com/arctan303/FlareTools/issues"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--accent)]"
-        >
-          <Globe className="size-4" aria-hidden="true" />
-          {t('about_issues_link')}
-        </a>
+      <section className="py-10">
+        <h2 className="font-brand text-xl font-semibold text-[var(--text-strong)]">{t('about_contact')}</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--muted)]">{t('about_contact_desc')}</p>
       </section>
     </div>
   );

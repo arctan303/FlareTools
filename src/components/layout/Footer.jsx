@@ -26,18 +26,8 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="flex flex-col gap-4 pt-6 text-xs text-[var(--faint)] sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {year} {t('site_name')}. {t('footer_copyright')}</p>
-          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2" aria-label={t('layout_footer_nav')}>
-            <a
-              href="https://github.com/arctan303/FlareTools"
-              target="_blank"
-              rel="noreferrer"
-              className="transition-colors hover:text-[var(--text-strong)]"
-            >
-              {t('layout_space')}
-            </a>
-          </nav>
+        <div className="flex items-center justify-between pt-6 text-xs text-[var(--faint)]">
+          <p>&copy; {year} {t('site_name')}. {t('footer_all_rights')}</p>
         </div>
       </div>
     </footer>
