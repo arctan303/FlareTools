@@ -1,0 +1,12 @@
+# Cloudflare Pages Functions / Worker Local Variables (.dev.vars.example)
+
+# Cloudflare Turnstile Secret Key (Optional)
+# If left unset or set to empty, Turnstile verification is automatically disabled
+# Cloudflare dummy test secret key (always passes):
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# Set to false to disable Turnstile captcha verification completely (default: true if TURNSTILE_SECRET_KEY is set)
+# ENABLE_TURNSTILE=false
+
+# Allowed Origin for CORS (Optional, defaults to request origin or *)
+# ALLOWED_ORIGIN=*

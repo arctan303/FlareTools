@@ -1,0 +1,33 @@
+import {
+  Binary,
+  Boxes,
+  Braces,
+  ClipboardCopy,
+  Clock3,
+  FileCode2,
+  FolderSync,
+  GitCompareArrows,
+  KeyRound,
+  ListTree,
+  Palette,
+  QrCode,
+  RadioTower,
+  ShieldCheck,
+} from 'lucide-react';
+
+export const TOOL_ICONS = Object.freeze({
+  Binary,
+  Boxes,
+  Braces,
+  ClipboardCopy,
+  Clock3,
+  FileCode2,
+  FolderSync,
+  GitCompareArrows,
+  KeyRound,
+  ListTree,
+  Palette,
+  QrCode,
+  RadioTower,
+  ShieldCheck,
+});

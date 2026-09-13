@@ -1,0 +1,14 @@
+name = "flare-tools"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-05-07"
+
+# D1 Database binding for temporary text-share and WebRTC signaling rooms
+# To initialize your D1 database:
+# 1. Run: npx wrangler d1 create flare-tools-db
+# 2. Paste the generated database_id below
+# 3. Execute schema: npx wrangler d1 execute flare-tools-db --remote --file=./schema.sql
+
+[[d1_databases]]
+binding = "DB"
+database_name = "flare-tools-db"
+database_id = "YOUR_D1_DATABASE_ID"

@@ -1,0 +1,252 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-primary: var(--text-strong);
+  --color-secondary: var(--muted);
+  --color-accent: var(--accent);
+  --color-page: var(--page);
+  --color-page-soft: var(--page-soft);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --font-sans: "Inter", "Noto Sans CJK SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", STSong, serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --vt-x: 50%;
+  --vt-y: 50%;
+  --vt-duration: 520ms;
+  --vt-easing: ease-out;
+  --page: #f5f3ec;
+  --page-soft: #faf8f1;
+  --surface: #fffdf7;
+  --text-strong: #172b43;
+  --text: #2b2924;
+  --muted: #6f6a60;
+  --faint: #756e62;
+  --line: #ded8c8;
+  --line-strong: #c8bda8;
+  --accent: #1b456f;
+  --on-accent: #fffdf7;
+  --success: #587a52;
+  --warning: #916520;
+  --danger: #963d35;
+  --on-danger: #fffdf7;
+  --focus-ring: color-mix(in srgb, var(--accent) 34%, transparent);
+  --shadow-float: 0 16px 40px rgba(36, 31, 23, 0.1);
+  --motion-fast: 140ms;
+  --motion-base: 220ms;
+  --motion-slow: 340ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --page: #181714;
+  --page-soft: #1f1e1a;
+  --surface: #25231e;
+  --text-strong: #e0e7f0;
+  --text: #eee8d8;
+  --muted: #b0a895;
+  --faint: #938b7b;
+  --line: #403b31;
+  --line-strong: #5a5244;
+  --accent: #b4c9e2;
+  --on-accent: #14283f;
+  --success: #9ab58f;
+  --warning: #d2aa67;
+  --danger: #d0877c;
+  --on-danger: #211513;
+  --focus-ring: color-mix(in srgb, var(--accent) 42%, transparent);
+  --shadow-float: 0 16px 44px rgba(0, 0, 0, 0.28);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-width: 320px;
+    min-height: 100%;
+    background: var(--page);
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: var(--page);
+    color: var(--text);
+    font-family: var(--font-sans);
+    transition:
+      background-color var(--motion-base) var(--ease-standard),
+      color var(--motion-base) var(--ease-standard);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  [tabindex]:not([tabindex="-1"]) {
+    outline: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px var(--focus-ring);
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 24%, transparent);
+    color: var(--text-strong);
+  }
+
+  /* 明暗切换：基于点击坐标的径向剪裁波纹动画（对齐 mail-vue） */
+  html.dark,
+  html:not(.dark) {
+    view-transition-name: root;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+    display: block;
+  }
+
+  /* 层级控制：切到暗色时新视图在上扩散；切到浅色时旧视图在上收缩 */
+  html[data-theme-to='dark']::view-transition-new(root) { z-index: 2; }
+  html[data-theme-to='dark']::view-transition-old(root) { z-index: 1; }
+  html[data-theme-to='light']::view-transition-old(root) { z-index: 2; }
+  html[data-theme-to='light']::view-transition-new(root) { z-index: 1; }
+
+  /* 切到暗色：新暗色视图从点击点向外扩散 */
+  html[data-theme-to='dark']::view-transition-new(root) {
+    clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%));
+    animation: vt-radial-in var(--vt-duration, 520ms) var(--vt-easing, ease-out) forwards;
+  }
+
+  /* 切到浅色：旧暗色视图向点击点收缩，显露出下方的明亮浅色视图 */
+  html[data-theme-to='light']::view-transition-old(root) {
+    clip-path: circle(var(--vt-end-radius, 150vmax) at var(--vt-x, 50%) var(--vt-y, 50%));
+    animation: vt-radial-out var(--vt-duration, 520ms) var(--vt-easing, ease-out) forwards;
+  }
+
+  @keyframes vt-radial-in {
+    from { clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%)); }
+    to   { clip-path: circle(var(--vt-end-radius, 150vmax) at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  }
+
+  @keyframes vt-radial-out {
+    from { clip-path: circle(var(--vt-end-radius, 150vmax) at var(--vt-x, 50%) var(--vt-y, 50%)); }
+    to   { clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%)); }
+  }
+
+  .lang-transition::view-transition-old(root) {
+    animation: langFadeOut 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .lang-transition::view-transition-new(root) {
+    animation: langFadeIn 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+}
+
+@keyframes langFadeOut {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(4px); }
+}
+
+@keyframes langFadeIn {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@layer utilities {
+  .font-brand {
+    font-family: var(--font-serif);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+
+}
+
+@layer components {
+  .tool-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-strong);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .tool-control {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--page-soft);
+    color: var(--text-strong);
+    padding: 0.625rem 0.75rem;
+  }
+
+  .tool-control::placeholder {
+    color: var(--faint);
+  }
+
+  .tool-control:disabled,
+  .tool-control[readonly] {
+    border-color: var(--line);
+    color: var(--muted);
+  }
+
+  textarea.tool-control {
+    line-height: 1.65;
+    resize: vertical;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

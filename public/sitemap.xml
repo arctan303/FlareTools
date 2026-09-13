@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Replace https://example.com with your actual deployment domain -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://example.com/share/text</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://example.com/share/file</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://example.com/dev/transformer</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/dev/string</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/dev/generator</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/dev/color</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/dev/timestamp</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/security/jwt</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/text/markdown</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/text/diff</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/tools/qrcode</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://example.com/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+</urlset>

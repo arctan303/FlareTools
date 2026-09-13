@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="theme-color" content="#f5f3ec">
+    <!-- 阻塞渲染：统一主题初始化，防 FOUC -->
+    <script>
+      (function(){
+        function getThemeMode(){
+          try{
+            var s=localStorage.getItem('theme_pref');
+            if(!s)return 'system';
+            if(s==='dark'||s==='light'){
+              localStorage.setItem('theme_pref',JSON.stringify({value:s,expires:Date.now()+21600000}));
+              return s;
+            }
+            var d=JSON.parse(s);
+            if(d.expires>Date.now()&&(d.value==='system'||d.value==='dark'||d.value==='light'))return d.value;
+            localStorage.removeItem('theme_pref');
+          }catch(e){}
+          return 'system';
+        }
+        var m=getThemeMode();
+        var t=m==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):m;
+        document.documentElement.classList.toggle('dark',t==='dark');
+        document.documentElement.dataset.theme=t;
+        document.documentElement.style.colorScheme=t;
+      })();
+    </script>
+    
+    <title data-rh="true">FlareTools · 现代化开源开发者工具箱</title>
+    <meta name="description" content="现代化、注重隐私的开发者工具箱，支持本地纯前端处理与按需跨设备传递。">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="128x128">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/favicon.png" sizes="180x180">
+    <meta name="keywords" content="developer tools, json formatter, base64 encoder, text share, hash generator, timestamp converter, flaretools">
+    <meta property="og:title" content="FlareTools · 现代化开源开发者工具箱">
+    <meta property="og:description" content="现代化、注重隐私的开发者工具箱，支持本地纯前端处理与按需跨设备传递。">
+    <meta property="og:site_name" content="FlareTools">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/favicon.png">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FlareTools · 现代化开源开发者工具箱">
+    <meta name="twitter:description" content="现代化、注重隐私的开发者工具箱，支持本地纯前端处理与按需跨设备传递。">
+    <meta name="twitter:image" content="/favicon.png">
+
+    <!-- 站点结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "FlareTools",
+      "alternateName": ["FlareTools", "Flare Tools"],
+      "description": "现代化、注重隐私的开发者工具箱，支持本地纯前端处理与按需跨设备传递。"
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <noscript>
+      <main style="max-width:1240px;margin:0 auto;padding:2rem 1rem">
+        <h1>FlareTools</h1>
+        <p>好用的工具，安静地放在一起。</p>
+        <p>现代化、注重隐私的开发者工具箱，支持本地纯前端处理与按需跨设备传递。</p>
+        <nav aria-label="工具导航">
+          <ul>
+            <li><a href="/dev/transformer">数据转换器 — JSON / YAML / TOML / CSV 互转</a></li>
+            <li><a href="/dev/string">字符串处理 — Base64 / URL / Hash 编解码</a></li>
+            <li><a href="/dev/generator">密码与 UUID 生成器</a></li>
+            <li><a href="/dev/color">颜色转换器 — HEX / RGB / HSL 互转</a></li>
+            <li><a href="/dev/timestamp">时间戳转换</a></li>
+            <li><a href="/security/jwt">JWT 解析器</a></li>
+            <li><a href="/text/markdown">Markdown 预览</a></li>
+            <li><a href="/text/diff">文本对比</a></li>
+            <li><a href="/tools/qrcode">二维码生成器</a></li>
+            <li><a href="/share/text">文本中转站</a></li>
+          </ul>
+        </nav>
+      </main>
+      </noscript>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
