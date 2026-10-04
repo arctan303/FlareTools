@@ -8,7 +8,7 @@ import StatusNotice from '../../components/ui/StatusNotice';
 import ToolPageHeader from '../../components/ui/ToolPageHeader';
 import ToolPanel from '../../components/ui/ToolPanel';
 import { useI18n } from '../../contexts/I18nContext';
-import { analyzeString } from '../../utils/stringProcessor';
+import { analyzeString, decodeString } from '../../utils/stringProcessor';
 
 const RESULT_FIELDS = [
   { key: 'md5', label: 'MD5' },
@@ -25,7 +25,7 @@ function ResultCard({ title, value }) {
         <h2 className="font-mono text-sm font-semibold text-[var(--text-strong)]">{title}</h2>
         <CopyButton value={value} />
       </div>
-      <output className="min-h-20 break-all rounded-[8px] border border-[var(--line)] bg-[var(--page-soft)] p-3 font-mono text-xs leading-6 text-[var(--muted)]">
+    <output className="min-h-20 whitespace-pre-wrap break-all rounded-[8px] border border-[var(--line)] bg-[var(--page-soft)] p-3 font-mono text-xs leading-6 text-[var(--muted)]">
         {value || '—'}
       </output>
     </article>
@@ -35,7 +35,10 @@ function ResultCard({ title, value }) {
 export default function StringProcessor() {
   const { t } = useI18n();
   const [input, setInput] = useState('');
+  const [mode, setMode] = useState('encode');
   const analysis = useMemo(() => analyzeString(input), [input]);
+  const decoded = useMemo(() => mode === 'encode' ? null : decodeString(input, mode), [input, mode]);
+  const resultFields = mode === 'encode' ? RESULT_FIELDS : RESULT_FIELDS.filter(({ key }) => ['md5', 'sha1', 'sha256'].includes(key));
   const statItems = [
     [t('tool_counter_characters'), analysis.stats.chars],
     [t('tool_counter_words'), analysis.stats.words],
@@ -55,6 +58,12 @@ export default function StringProcessor() {
       <LocalToolNotice className="mt-6" />
 
       <ToolPanel className="mt-5" title={t('tool_string_input_title')} description={t('tool_string_input_desc')}>
+        <label className="tool-label" htmlFor="string-mode">{t('local_string_mode')}</label>
+        <select id="string-mode" value={mode} onChange={(event) => setMode(event.target.value)} className="tool-control mb-4 sm:max-w-xs">
+          <option value="encode">{t('local_string_encode')}</option>
+          <option value="base64">{t('local_string_base64_decode')}</option>
+          <option value="url">{t('local_string_url_decode')}</option>
+        </select>
         <label className="sr-only" htmlFor="string-input">{t('tool_string_input_title')}</label>
         <textarea
           id="string-input"
@@ -66,6 +75,10 @@ export default function StringProcessor() {
         {analysis.error && (
           <StatusNotice className="mt-4" tone="error">{t('tool_string_process_failed')}</StatusNotice>
         )}
+        {decoded?.error && (
+          <StatusNotice className="mt-4" tone="error">{t(`local_string_${decoded.error.replaceAll('-', '_')}`)}</StatusNotice>
+        )}
+        {mode !== 'encode' && <p className="mt-3 text-xs text-[var(--muted)]">{t('local_string_input_stats')}</p>}
         <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {statItems.map(([label, value]) => (
             <div key={label} className="rounded-[8px] border border-[var(--line)] bg-[var(--page-soft)] px-3 py-3">
@@ -77,7 +90,8 @@ export default function StringProcessor() {
       </ToolPanel>
 
       <section className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-label={t('tool_string_results')}>
-        {RESULT_FIELDS.map(({ key, label, labelKey }) => (
+        {decoded && <ResultCard title={t('local_string_decoded')} value={decoded.value} />}
+        {resultFields.map(({ key, label, labelKey }) => (
           <ResultCard key={key} title={labelKey ? t(labelKey) : label} value={analysis.results[key]} />
         ))}
       </section>

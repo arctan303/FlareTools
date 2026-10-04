@@ -6,9 +6,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:worker": "wrangler dev --local --ip 127.0.0.1 --port 8787 --local-upstream 127.0.0.1:8787",
+    "deploy": "npm run build && wrangler deploy",
+    "check:worker": "wrangler deploy --dry-run --outdir .wrangler/check",
+    "db:local": "wrangler d1 execute flare-tools-db --local --file=./schema.sql",
+    "db:remote": "wrangler d1 execute flare-tools-db --remote --file=./schema.sql",
     "build": "vite build",
     "lint": "eslint .",
     "test": "node --test",
+    "test:worker": "node scripts/worker-smoke.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -48,6 +54,7 @@
     "globals": "^17.6.0",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "wrangler": "^4.147.0"
   }
 }

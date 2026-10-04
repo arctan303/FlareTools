@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { TOOL_ICONS } from '../components/icons/toolIcons';
@@ -17,6 +18,9 @@ const fadeUp = {
 
 export default function Home() {
   const { t } = useI18n();
+  const [query, setQuery] = useState('');
+  const search = query.trim().toLocaleLowerCase();
+  const visibleTools = HOME_TOOLS.filter((tool) => !search || `${t(tool.titleKey)} ${t(tool.descriptionKey)} ${t(tool.categoryTitleKey)}`.toLocaleLowerCase().includes(search));
 
   return (
     <div className="space-y-10 sm:space-y-12">
@@ -44,15 +48,19 @@ export default function Home() {
           </motion.h2>
         </div>
 
+        <label htmlFor="tool-search" className="sr-only">{t('home_search')}</label>
+        <input id="tool-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('home_search_placeholder')} className="tool-control mb-6 w-full max-w-xl" />
+        {visibleTools.length === 0 && <p className="text-sm text-[var(--muted)]">{t('home_search_empty')}</p>}
+
         <motion.div variants={stagger} className="grid auto-rows-fr gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {HOME_TOOLS.map((tool) => {
+          {visibleTools.map((tool) => {
             const Icon = TOOL_ICONS[tool.icon];
             return (
               <motion.div variants={fadeUp} key={tool.path} className="flex h-full flex-col">
                 <Link
                   to={tool.path}
                   data-tool-card
-                  data-tool-kind={tool.categoryId === 'cross-device' ? 'cross-device' : 'local'}
+                  data-tool-kind={tool.categoryId === 'cross-device' ? 'cross-device' : tool.categoryId === 'cloud-tools' ? 'cloud' : 'local'}
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);

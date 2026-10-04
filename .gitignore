@@ -23,7 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 .wrangler
+.cache/
 _worker.bundle
+.workbuddy-ai
 output/playwright
 .playwright-cli/
 test_sync.js

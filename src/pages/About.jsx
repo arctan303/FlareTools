@@ -1,4 +1,4 @@
-import { ArrowLeft, Cloud, Code2, RadioTower, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowLeft, Cloud, Code2, ShieldCheck, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useI18n } from '../contexts/I18nContext';
@@ -6,7 +6,7 @@ import { useI18n } from '../contexts/I18nContext';
 const PRIVACY_ROWS = [
   ['about_privacy_local_title', 'about_privacy_local_desc', ShieldCheck],
   ['about_privacy_text_title', 'about_privacy_text_desc', Cloud],
-  ['about_privacy_file_title', 'about_privacy_file_desc', RadioTower],
+  ['about_privacy_network_title', 'about_privacy_network_desc', Cloud],
 ];
 
 export default function About() {
@@ -51,7 +51,7 @@ export default function About() {
           </h2>
           <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{t('about_tech_body')}</p>
           <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 font-mono text-xs text-[var(--faint)]" aria-label={t('about_tech')}>
-            {['React', 'Vite', 'Tailwind CSS', 'Cloudflare Pages', 'Workers', 'D1', 'WebRTC'].map((tech) => <li key={tech}>{tech}</li>)}
+            {['React', 'Vite', 'Tailwind CSS', 'Workers', 'Durable Objects', 'D1'].map((tech) => <li key={tech}>{tech}</li>)}
           </ul>
         </section>
       </div>

@@ -10,6 +10,36 @@ export function utf8ToBase64(input) {
   return btoa(binary);
 }
 
+export function decodeString(input, format = 'base64') {
+  if (!input) return { error: null, value: '' };
+
+  if (format === 'url') {
+    try {
+      return { error: null, value: decodeURIComponent(input) };
+    } catch {
+      return { error: 'invalid-url-encoding', value: '' };
+    }
+  }
+  if (format !== 'base64') return { error: 'invalid-format', value: '' };
+
+  // Accept wrapped or unpadded Base64, but reject malformed padding and bits.
+  const encoded = input.replace(/[\t\r\n ]/g, '');
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(encoded) || encoded.length % 4 === 1) {
+    return { error: 'invalid-base64', value: '' };
+  }
+  try {
+    const binary = atob(encoded);
+    if (btoa(binary).replace(/=+$/, '') !== encoded.replace(/=+$/, '')) {
+      return { error: 'invalid-base64', value: '' };
+    }
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    // Binary payloads must not silently become replacement characters.
+    return { error: null, value: new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes) };
+  } catch (error) {
+    return { error: error.name === 'TypeError' ? 'invalid-utf8' : 'invalid-base64', value: '' };
+  }
+}
+
 export function analyzeString(input) {
   if (!input) return { error: null, results: EMPTY_RESULTS, stats: EMPTY_STATS };
 

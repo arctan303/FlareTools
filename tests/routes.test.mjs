@@ -26,15 +26,17 @@ test('catalog tools, app routes and sitemap stay aligned', async () => {
   assert.deepEqual([...sitemapPaths].sort(), [...appRoutes].sort());
 });
 
-test('the catalog contains exactly the two cross-device tools and nine local tools', () => {
-  assert.deepEqual(TOOL_PATHS.slice(0, 2), ['/share/text', '/share/file']);
-  assert.equal(TOOL_PATHS.length, 11);
+test('the catalog contains one cross-device, two cloud and nine local tools', () => {
+  assert.deepEqual(TOOL_PATHS.slice(0, 1), ['/share/text']);
+  assert.equal(TOOL_PATHS.length, 12);
+  assert.equal(HOME_TOOLS.filter((tool) => tool.scopeKey === 'home_scope_local').length, 9);
+  assert.equal(HOME_TOOLS.filter((tool) => tool.scopeKey === 'home_scope_cloud').length, 2);
   assert.equal(new Set(TOOL_PATHS).size, TOOL_PATHS.length);
 });
 
 test('the home directory uses one complete card model for every tool', () => {
   assert.deepEqual(HOME_TOOLS.map((tool) => tool.path), TOOL_PATHS);
-  assert.equal(HOME_TOOLS.length, 11);
+  assert.equal(HOME_TOOLS.length, 12);
   HOME_TOOLS.forEach((tool) => {
     assert.ok(tool.categoryTitleKey);
     assert.ok(tool.descriptionKey);

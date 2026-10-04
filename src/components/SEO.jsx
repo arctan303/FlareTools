@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { useI18n } from '../contexts/I18nContext';
@@ -19,15 +18,6 @@ export default function SEO({ title, description, titleKey, descriptionKey, robo
   const baseUrl = import.meta.env.VITE_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
   const canonicalUrl = `${baseUrl}${pathname}`;
   const ogLocale = lang === 'zh-CN' ? 'zh_CN' : 'en_US';
-
-  // 标签页短 title：完整 SEO title 保留给爬虫（Bing 不渲染 JS），延迟替换为品牌短名
-  useEffect(() => {
-    if (!isHome) return;
-    const timer = window.setTimeout(() => {
-      document.title = siteNameShort;
-    }, 2000);
-    return () => window.clearTimeout(timer);
-  }, [isHome, siteNameShort]);
 
   return (
     <Helmet htmlAttributes={{ lang }}>

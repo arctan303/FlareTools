@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-
-# Replace with your actual domain sitemap if deploying for search indexing
-# Sitemap: https://your-domain.com/sitemap.xml
+Disallow: /api/
+Sitemap: https://tools.arcinks.com/sitemap.xml

@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS rooms_kv;
-CREATE TABLE rooms_kv (
+CREATE TABLE IF NOT EXISTS rooms_kv (
   key TEXT PRIMARY KEY,
   data TEXT,
   expires_at INTEGER

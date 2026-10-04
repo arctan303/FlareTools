@@ -21,10 +21,23 @@ export default function Qrcode() {
   const contentState = useMemo(() => validateQrContent(text), [text]);
   const canRender = contentState.status === 'valid';
 
-  const downloadQR = () => {
+  const downloadQR = (format) => {
     const svg = document.getElementById('qr-code-svg');
     if (!svg) {
       setDownloadState('error');
+      return;
+    }
+    const exportSvg = svg.cloneNode(true);
+    exportSvg.setAttribute('width', String(size));
+    exportSvg.setAttribute('height', String(size));
+    exportSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(exportSvg))}`;
+    if (format === 'svg') {
+      const link = document.createElement('a');
+      link.download = `qrcode_${Date.now()}.svg`;
+      link.href = svgUrl;
+      link.click();
+      setDownloadState('success');
       return;
     }
     const canvas = document.createElement('canvas');
@@ -35,19 +48,24 @@ export default function Qrcode() {
     }
     const image = new Image();
     image.onload = () => {
-      canvas.width = size;
-      canvas.height = size;
-      context.fillStyle = bgColor;
-      context.fillRect(0, 0, size, size);
-      context.drawImage(image, 0, 0, size, size);
-      const link = document.createElement('a');
-      link.download = `qrcode_${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      setDownloadState('success');
+      try {
+        canvas.width = size;
+        canvas.height = size;
+        context.imageSmoothingEnabled = false;
+        context.fillStyle = bgColor;
+        context.fillRect(0, 0, size, size);
+        context.drawImage(image, 0, 0, size, size);
+        const link = document.createElement('a');
+        link.download = `qrcode_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        setDownloadState('success');
+      } catch {
+        setDownloadState('error');
+      }
     };
     image.onerror = () => setDownloadState('error');
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
+    image.src = svgUrl;
   };
 
   return (
@@ -112,19 +130,24 @@ export default function Qrcode() {
           <section className="flex min-h-[420px] flex-col items-center justify-center rounded-[10px] border border-[var(--line)] bg-[var(--page-soft)] p-5" aria-label={t('tool_qr_preview')}>
             <div className="max-w-full overflow-auto rounded-[10px] border border-[var(--line)] bg-white p-4">
               {canRender ? (
-                <QRCodeSVG id="qr-code-svg" value={text} size={Math.min(size, 288)} fgColor={fgColor} bgColor={bgColor} level="M" />
+                <QRCodeSVG id="qr-code-svg" value={text} size={Math.min(size, 288)} fgColor={fgColor} bgColor={bgColor} level="M" marginSize={4} />
               ) : (
                 <div className="flex size-52 items-center justify-center px-4 text-center text-sm text-[var(--faint)]">
                   {t(contentState.status === 'too-long' ? 'tool_qr_too_long' : 'tool_qr_no_content')}
                 </div>
               )}
             </div>
-            <Button className="mt-6" disabled={!canRender} onClick={downloadQR}>
-              <Download className="size-4" aria-hidden="true" /> {t('tool_qr_download')}
-            </Button>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button disabled={!canRender} onClick={() => downloadQR('png')}>
+                <Download className="size-4" aria-hidden="true" /> {t('tool_qr_download')}
+              </Button>
+              <Button variant="secondary" disabled={!canRender} onClick={() => downloadQR('svg')}>
+                <Download className="size-4" aria-hidden="true" /> {t('local_qr_download_svg')}
+              </Button>
+            </div>
             {downloadState && (
               <StatusNotice className="mt-4 w-full" tone={downloadState === 'success' ? 'success' : 'error'}>
-                {t(downloadState === 'success' ? 'tool_qr_downloaded' : 'tool_qr_download_failed')}
+                {t(downloadState === 'success' ? 'local_qr_downloaded' : 'local_qr_download_failed')}
               </StatusNotice>
             )}
           </section>

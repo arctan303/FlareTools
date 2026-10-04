@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import translations from '../src/locales/translations.js';
 import { API_ERROR_KEYS, getApiErrorKey } from '../src/locales/errorCodes.js';
-import { ERROR_RESPONSE_CODES } from '../functions/api/text-share/responseCodes.js';
+import { ERROR_RESPONSE_CODES } from '../worker/text-share/responseCodes.js';
 
 test('English and Chinese translation resources expose the same keys', () => {
   const englishKeys = Object.keys(translations.en).sort();

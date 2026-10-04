@@ -20,6 +20,8 @@ const Markdown = lazy(() => import('./pages/text/Markdown'))
 const Diff = lazy(() => import('./pages/text/Diff'))
 const Qrcode = lazy(() => import('./pages/tools/Qrcode'))
 const TextShare = lazy(() => import('./pages/share/TextShare'))
+const NetworkInspector = lazy(() => import('./pages/dev/NetworkInspector'))
+const MockApi = lazy(() => import('./pages/dev/MockApi'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 function ScrollToTop() {
@@ -53,7 +55,8 @@ function App() {
                     <Route path="/text/diff" element={<Diff />} />
                     <Route path="/tools/qrcode" element={<Qrcode />} />
                     <Route path="/share/text" element={<TextShare />} />
-                    <Route path="/share/file" element={<TextShare />} />
+                    <Route path="/dev/network-inspector" element={<NetworkInspector />} />
+                    <Route path="/dev/mock-api" element={<MockApi />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

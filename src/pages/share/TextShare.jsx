@@ -1,14 +1,13 @@
 import { createPortal } from 'react-dom';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Clipboard,
   Copy,
   Download,
-  Folder,
   Info,
   KeyRound,
   QrCode,
+  RefreshCw,
   Share2,
   Trash2,
   X,
@@ -23,104 +22,21 @@ import ToolPageHeader from '../../components/ui/ToolPageHeader';
 import ToolPanel from '../../components/ui/ToolPanel';
 import { useI18n } from '../../contexts/I18nContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getApiErrorMessage } from '../../locales/errorCodes';
-import FileTransferPanel from './components/FileTransferPanel';
-import useDeviceRadar from './hooks/useDeviceRadar';
 import useTextRoom from './hooks/useTextRoom';
-import useWebRTCFileTransfer from './hooks/useWebRTCFileTransfer';
-import { buildRoomStatusUrl, readJsonResponse } from './shareRequestPolicy';
 
 export default function TextShare() {
   const { lang, t } = useI18n();
   const { isDark } = useTheme();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const isFileTransfer = location.pathname.includes('/share/file');
 
   const [captchaRequest, setCaptchaRequest] = useState(null);
   const [showQr, setShowQr] = useState(false);
   const onCaptchaRequired = useCallback((request) => setCaptchaRequest(request), []);
   const room = useTextRoom({ lang, onCaptchaRequired, t });
-  const {
-    createRoom,
-    deviceId,
-    inRoom,
-    joinRoom,
-    roomCode,
-    setDevices,
-    showStatus,
-  } = room;
-
-  const {
-    peers,
-    closePeerConnection,
-    stagedFiles,
-    availableFiles,
-    transfers,
-    stageFile,
-    requestFile,
-    removeTransfer,
-    processSignal,
-    syncDevices,
-    initiateConnection,
-  } = useWebRTCFileTransfer(room.roomCode, room.deviceId);
-
-  const processedSignalsRef = useRef(new Set());
-  const fileRequestAbortRef = useRef(null);
-  const fileRequestGenerationRef = useRef(0);
+  const { createRoom, joinRoom } = room;
   const turnstileWidgetRef = useRef(null);
 
-  const invalidateFileRequests = useCallback(() => {
-    fileRequestGenerationRef.current += 1;
-    fileRequestAbortRef.current?.abort();
-    fileRequestAbortRef.current = null;
-    processedSignalsRef.current = new Set();
-  }, []);
-
-  useLayoutEffect(() => {
-    invalidateFileRequests();
-    return invalidateFileRequests;
-  }, [deviceId, invalidateFileRequests, isFileTransfer, roomCode]);
-
-  const refreshFileState = useCallback(async () => {
-    if (!inRoom || !roomCode || !deviceId) return;
-    const generation = fileRequestGenerationRef.current;
-    const abortController = new AbortController();
-    fileRequestAbortRef.current = abortController;
-    try {
-      const response = await fetch(buildRoomStatusUrl(roomCode, deviceId), {
-        signal: abortController.signal,
-      });
-      const data = await readJsonResponse(response);
-      if (abortController.signal.aborted || generation !== fileRequestGenerationRef.current) return;
-      setDevices(data.devices || {});
-      syncDevices(Object.keys(data.devices || {}));
-
-      for (const signal of data.signals || []) {
-        if (abortController.signal.aborted || generation !== fileRequestGenerationRef.current) return;
-        if (processedSignalsRef.current.has(signal.id)) continue;
-        processedSignalsRef.current.add(signal.id);
-        await processSignal(signal);
-      }
-    } catch (requestError) {
-      if (requestError.name === 'AbortError' || abortController.signal.aborted) return;
-      showStatus(requestError.response
-        ? getApiErrorMessage(requestError.response, t)
-        : t('share_network_error'), 'error');
-    } finally {
-      if (fileRequestAbortRef.current === abortController) {
-        fileRequestAbortRef.current = null;
-      }
-    }
-  }, [deviceId, inRoom, processSignal, roomCode, setDevices, showStatus, syncDevices, t]);
-
-  const radar = useDeviceRadar({
-    enabled: isFileTransfer && inRoom,
-    poll: refreshFileState,
-  });
-
   useEffect(() => {
-    if (!captchaRequest) return;
+    if (!captchaRequest) return undefined;
     let cancelled = false;
 
     const renderWidget = () => {
@@ -166,8 +82,6 @@ export default function TextShare() {
 
   const handleLeave = async () => {
     if (!window.confirm(t('share_leave_confirm'))) return;
-    radar.stop();
-    invalidateFileRequests();
     await room.leaveRoom();
   };
 
@@ -188,11 +102,18 @@ export default function TextShare() {
     link.download = `shared_text_${room.roomCode}.txt`;
     link.click();
     URL.revokeObjectURL(url);
-    room.showStatus(t('share_file_saved'), 'success', true);
+    room.showStatus(t('share_downloaded'), 'success', true);
   };
 
   const clearText = () => {
-    if (window.confirm(t('share_clear_confirm'))) room.saveContentNow('');
+    if (window.confirm(t('share_clear_confirm'))) {
+      if (room.roomEnded) room.changeContent('');
+      else room.saveContentNow('');
+    }
+  };
+
+  const handleDestroy = async () => {
+    if (window.confirm(t('share_destroy_confirm'))) await room.destroyRoom();
   };
 
   const inviteUrl = (() => {
@@ -203,16 +124,13 @@ export default function TextShare() {
 
   return (
     <ToolLayout>
-      <SEO
-        titleKey={isFileTransfer ? 'tool_file_transfer' : 'tool_text_share'}
-        descriptionKey={isFileTransfer ? 'tool_file_transfer_desc' : 'tool_text_share_desc'}
-      />
+      <SEO titleKey="tool_text_share" descriptionKey="tool_text_share_desc" />
 
       <ToolPageHeader
         eyebrow={t('share_cross_device_eyebrow')}
-        icon={isFileTransfer ? Folder : Share2}
-        title={t(isFileTransfer ? 'tool_file_transfer' : 'tool_text_share')}
-        description={t(isFileTransfer ? 'tool_file_transfer_desc' : 'tool_text_share_desc')}
+        icon={Share2}
+        title={t('tool_text_share')}
+        description={t('tool_text_share_desc')}
       />
 
       {!room.inRoom ? (
@@ -220,9 +138,10 @@ export default function TextShare() {
       ) : (
         <div className="mt-6 space-y-5 sm:mt-8">
           <RoomBar
-            deviceId={room.deviceId}
-            isFileTransfer={isFileTransfer}
-            navigate={navigate}
+            deviceId={room.publicDeviceId}
+            expiresAt={room.expiresAt}
+            roomEnded={room.roomEnded}
+            onDestroy={handleDestroy}
             onCopyCode={() => copyText(room.roomCode)}
             onLeave={handleLeave}
             onShowQr={() => setShowQr(true)}
@@ -230,12 +149,18 @@ export default function TextShare() {
             t={t}
           />
 
-          {room.status && (
+          <StatusNotice tone={room.roomEnded ? 'warning' : 'info'}>
+            {room.roomEnded
+              ? t(room.roomEnded.reason === 'expired' ? 'share_room_expired' : room.roomEnded.reason === 'destroyed' ? 'share_room_destroyed' : 'share_room_ended')
+              : t(room.connectionState === 'live' ? 'share_connection_live' : room.connectionState === 'connecting' ? 'share_connection_connecting' : room.connectionState === 'closed' ? 'share_connection_closed' : 'share_connection_offline')}
+          </StatusNotice>
+
+          {room.status && !room.roomEnded && (
             <StatusNotice tone={room.status.tone}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <span>{room.status.message}</span>
                 {room.saveFailed && (
-                  <Button variant="secondary" loading={room.saving} onClick={room.retrySave}>
+                  <Button variant="secondary" size="sm" loading={room.saving} onClick={room.retrySave}>
                     {t('share_retry_save')}
                   </Button>
                 )}
@@ -243,37 +168,12 @@ export default function TextShare() {
             </StatusNotice>
           )}
 
-          {!isFileTransfer ? (
-            <TextWorkspace
-              room={room}
-              t={t}
-              onClear={clearText}
-              onDownload={downloadText}
-            />
-          ) : (
-            <ToolPanel>
-              <FileTransferPanel
-                peers={peers}
-                stagedFiles={stagedFiles}
-                availableFiles={availableFiles}
-                cancelConnection={closePeerConnection}
-                transfers={transfers}
-                stageFile={stageFile}
-                requestFile={requestFile}
-                removeTransfer={removeTransfer}
-                devices={room.devices}
-                myDeviceId={room.deviceId}
-                isRefreshing={radar.isRefreshing}
-                isScanning={radar.isScanning}
-                radarStopReason={radar.stopReason}
-                radarRemainingSeconds={radar.remainingSeconds}
-                startRadar={radar.start}
-                stopRadar={radar.stop}
-                refreshDevices={radar.refresh}
-                initiateConnection={initiateConnection}
-              />
-            </ToolPanel>
-          )}
+          <TextWorkspace
+            room={room}
+            t={t}
+            onClear={clearText}
+            onDownload={downloadText}
+          />
         </div>
       )}
 
@@ -350,16 +250,7 @@ function RoomEntry({ room, t }) {
   );
 }
 
-function RoomBar({
-  deviceId,
-  isFileTransfer,
-  navigate,
-  onCopyCode,
-  onLeave,
-  onShowQr,
-  roomCode,
-  t,
-}) {
+function RoomBar({ deviceId, expiresAt, onCopyCode, onDestroy, onLeave, onShowQr, roomCode, roomEnded, t }) {
   return (
     <ToolPanel className="!p-3 sm:!p-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -380,31 +271,15 @@ function RoomBar({
           <div>
             <p className="text-xs text-[var(--faint)]">{t('share_device_id')}</p>
             <p className="mt-1 flex items-center gap-1 font-mono text-sm text-[var(--muted)]">
-              <Info className="size-3.5" aria-hidden="true" /> {deviceId.slice(0, 8)}…
+              <Info className="size-3.5" aria-hidden="true" /> {deviceId?.slice(0, 8)}…
             </p>
           </div>
+          {expiresAt && <p className="text-xs text-[var(--muted)]">{t('share_expires_at')} · {new Date(expiresAt * 1000).toLocaleString()}</p>}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-[10px] border border-[var(--line)] bg-[var(--page-soft)] p-1">
-            <button
-              type="button"
-              aria-current={!isFileTransfer ? 'page' : undefined}
-              onClick={() => navigate('/share/text')}
-              className={`min-h-11 rounded-[7px] px-3 text-sm font-medium ${!isFileTransfer ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--muted)]'}`}
-            >
-              {t('share_text_tab')}
-            </button>
-            <button
-              type="button"
-              aria-current={isFileTransfer ? 'page' : undefined}
-              onClick={() => navigate('/share/file')}
-              className={`min-h-11 rounded-[7px] px-3 text-sm font-medium ${isFileTransfer ? 'bg-[var(--surface)] text-[var(--accent)] shadow-sm' : 'text-[var(--muted)]'}`}
-            >
-              {t('share_files')}
-            </button>
-          </div>
+        <div className="flex flex-wrap gap-2">
           <Button variant="ghost" onClick={onLeave}>{t('share_leave')}</Button>
+          <Button variant="danger" disabled={Boolean(roomEnded)} onClick={onDestroy}>{t('share_destroy')}</Button>
         </div>
       </div>
     </ToolPanel>
@@ -412,15 +287,22 @@ function RoomBar({
 }
 
 function TextWorkspace({ onClear, onDownload, room, t }) {
+  const editorAuthor = room.lastEditor
+    ? (room.lastEditor === room.publicDeviceId ? t('share_updated_by_you') : `${room.lastEditor.slice(0, 8)}…`)
+    : t('share_no_update');
+
   return (
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px]">
       <ToolPanel title={t('share_editor_title')} description={t('share_text_workflow_hint')}>
         <div className="mb-4 flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={room.pasteAndSave}>
+          <Button variant="secondary" disabled={Boolean(room.roomEnded)} onClick={room.pasteAndSave}>
             <Clipboard className="size-4" aria-hidden="true" /> {t('share_paste')}
           </Button>
-          <Button loading={room.pulling} onClick={room.pullAndCopy}>
-            <Copy className="size-4" aria-hidden="true" /> {t('share_pull_copy')}
+          <Button loading={room.pulling} disabled={Boolean(room.roomEnded)} onClick={room.pullContent}>
+            <RefreshCw className="size-4" aria-hidden="true" /> {t('share_pull_latest')}
+          </Button>
+          <Button variant="secondary" onClick={room.copyContent}>
+            <Copy className="size-4" aria-hidden="true" /> {t('share_copy_text')}
           </Button>
           <Button variant="secondary" onClick={onDownload}>
             <Download className="size-4" aria-hidden="true" /> {t('share_download_text')}
@@ -429,6 +311,31 @@ function TextWorkspace({ onClear, onDownload, room, t }) {
             <Trash2 className="size-4" aria-hidden="true" /> {t('share_clear')}
           </Button>
         </div>
+
+        {room.conflict && (
+          <StatusNotice className="mb-4" tone="warning" title={t('share_conflict_title')}>
+            <p>{t('share_conflict_desc')}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" variant="secondary" onClick={room.resolveConflictByPulling}>
+                {t('share_conflict_pull')}
+              </Button>
+              <Button size="sm" variant="danger" onClick={room.resolveConflictByOverwriting}>
+                {t('share_conflict_overwrite')}
+              </Button>
+            </div>
+          </StatusNotice>
+        )}
+
+        {!room.conflict && room.remoteUpdated && (
+          <StatusNotice className="mb-4" tone="info" title={t('share_remote_updated')}>
+            <p>{t('share_remote_updated_hint')}</p>
+            <div className="mt-3">
+              <Button size="sm" variant="secondary" loading={room.pulling} onClick={room.pullContent}>
+                <RefreshCw className="size-4" aria-hidden="true" /> {t('share_pull_latest')}
+              </Button>
+            </div>
+          </StatusNotice>
+        )}
 
         <label htmlFor="shared-text" className="sr-only">{t('share_editor_title')}</label>
         <textarea
@@ -439,10 +346,21 @@ function TextWorkspace({ onClear, onDownload, room, t }) {
           spellCheck="false"
           className="min-h-[320px] w-full resize-y rounded-[10px] border border-[var(--line-strong)] bg-[var(--page-soft)] p-4 font-mono text-sm leading-7 text-[var(--text-strong)] sm:min-h-[440px]"
         />
-        <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs text-[var(--faint)]">
-          <span>{t('share_chars')} {room.content.length}</span>
-          <span>{t('share_last_update')} {room.lastUpdate || t('share_no_update')}</span>
+
+        <div className="mt-3 flex flex-wrap justify-between gap-2 text-xs">
+          <span className={room.overLimit ? 'text-[var(--danger)]' : 'text-[var(--faint)]'}>
+            {t('share_chars')} {room.content.length} / {room.maxTextLength}
+          </span>
+          <span className="text-[var(--faint)]">
+            {t('share_last_update')} {room.lastUpdate || t('share_no_update')}
+            {' · '}
+            {t('share_updated_by')} {editorAuthor}
+          </span>
         </div>
+
+        {room.overLimit && (
+          <StatusNotice className="mt-3" tone="error">{t('share_over_limit')}</StatusNotice>
+        )}
       </ToolPanel>
 
       <div className="space-y-5">
@@ -456,9 +374,10 @@ function TextWorkspace({ onClear, onDownload, room, t }) {
             )}
             {Object.keys(room.devices).map((id) => (
               <li key={id} className="flex items-center gap-2 rounded-[8px] border border-[var(--line)] bg-[var(--page-soft)] px-3 py-2 text-xs">
-                <span className="size-2 shrink-0 rounded-full bg-[var(--success)]" aria-hidden="true" />
+                <span className={`size-2 shrink-0 rounded-full ${room.devices[id].connected ? 'bg-[var(--success)]' : 'bg-[var(--faint)]'}`} aria-hidden="true" />
                 <span className="min-w-0 truncate font-mono text-[var(--muted)]">
-                  {id} {id === room.deviceId ? t('share_you') : ''}
+                  {id.slice(0, 8)}… {id === room.publicDeviceId ? t('share_you') : ''}
+                  {' · '}{t(room.devices[id].connected ? 'share_member_online' : 'share_member_offline')}
                 </span>
               </li>
             ))}

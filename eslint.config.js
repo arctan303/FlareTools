@@ -15,7 +15,7 @@ export default defineConfig([
     'test_sync.js',
   ]),
   {
-    files: ['src/**/*.{js,jsx}', 'functions/**/*.js'],
+    files: ['src/**/*.{js,jsx}', 'worker/**/*.js'],
     extends: [
       js.configs.recommended,
       reactHooks.configs.flat.recommended,
@@ -31,7 +31,6 @@ export default defineConfig([
     files: [
       'src/pages/dev/DataTransformer.jsx',
       'src/pages/share/TextShare.jsx',
-      'src/pages/share/hooks/useWebRTCFileTransfer.js',
     ],
     rules: { 'react-hooks/immutability': 'warn' },
   },
@@ -52,7 +51,7 @@ export default defineConfig([
     rules: { 'react-hooks/static-components': 'warn' },
   },
   {
-    files: ['*.config.js', '*.config.cjs', 'add_seo.cjs', 'tests/**/*.mjs'],
+    files: ['*.config.js', '*.config.cjs', 'add_seo.cjs', 'tests/**/*.mjs', 'scripts/**/*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: {
       globals: globals.node,

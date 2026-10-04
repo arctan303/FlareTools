@@ -1,10 +1,9 @@
-import { Cloud, RadioTower, ShieldCheck } from 'lucide-react';
+import { Cloud, ShieldCheck } from 'lucide-react';
 import { useI18n } from '../../contexts/I18nContext';
 
 const PRIVACY_ITEMS = [
   ['footer_local_title', 'footer_local_desc', ShieldCheck],
   ['footer_text_title', 'footer_text_desc', Cloud],
-  ['footer_file_title', 'footer_file_desc', RadioTower],
 ];
 
 export default function Footer() {
@@ -14,7 +13,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto border-t border-[var(--line)] bg-[var(--page-soft)]">
       <div className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-5 border-b border-[var(--line)] pb-7 md:grid-cols-3">
+        <div className="grid gap-5 border-b border-[var(--line)] pb-7 md:grid-cols-2">
           {PRIVACY_ITEMS.map(([titleKey, descriptionKey, Icon]) => (
             <div key={titleKey} className="flex gap-3">
               <Icon className="mt-0.5 size-4 shrink-0 text-[var(--accent)]" aria-hidden="true" />

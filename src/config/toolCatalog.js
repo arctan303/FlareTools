@@ -6,7 +6,16 @@ export const TOOL_CATEGORIES = Object.freeze([
     icon: 'RadioTower',
     tools: [
       { path: '/share/text', titleKey: 'tool_text_share', descriptionKey: 'tool_text_share_desc', icon: 'ClipboardCopy' },
-      { path: '/share/file', titleKey: 'tool_file_transfer', descriptionKey: 'tool_file_transfer_desc', icon: 'FolderSync' },
+    ],
+  },
+  {
+    id: 'cloud-tools',
+    titleKey: 'cat_cloud_tools',
+    descriptionKey: 'cat_cloud_tools_desc',
+    icon: 'Cloud',
+    tools: [
+      { path: '/dev/network-inspector', titleKey: 'tool_network_inspector', descriptionKey: 'tool_network_inspector_desc', icon: 'Globe' },
+      { path: '/dev/mock-api', titleKey: 'tool_mock_api', descriptionKey: 'tool_mock_api_desc', icon: 'Braces' },
     ],
   },
   {
@@ -42,7 +51,7 @@ export const HOME_TOOLS = Object.freeze(TOOL_CATEGORIES.flatMap((category) => (
     ...tool,
     categoryId: category.id,
     categoryTitleKey: category.titleKey,
-    scopeKey: category.id === 'cross-device' ? 'home_scope_cross_device' : 'home_scope_local',
+    scopeKey: category.id === 'cross-device' ? 'home_scope_cross_device' : category.id === 'cloud-tools' ? 'home_scope_cloud' : 'home_scope_local',
   }))
 )));
 export const TOOL_PATHS = Object.freeze(ALL_TOOLS.map((tool) => tool.path));

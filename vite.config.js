@@ -8,6 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: { navigateFallbackDenylist: [/^\/api(?:\/|$)/] },
       manifest: {
         name: 'FlareTools',
         short_name: 'FlareTools',
@@ -35,8 +36,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8788',
+        target: 'http://127.0.0.1:8787',
+        ws: true,
         changeOrigin: true,
+        configure(proxy) {
+          const rewriteOrigin = (proxyRequest) => proxyRequest.setHeader('Origin', 'http://127.0.0.1:8787');
+          proxy.on('proxyReq', rewriteOrigin);
+          proxy.on('proxyReqWs', rewriteOrigin);
+        },
       }
     }
   }

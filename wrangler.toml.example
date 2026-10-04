@@ -1,8 +1,32 @@
-name = "flare-tools"
-pages_build_output_dir = "dist"
-compatibility_date = "2026-05-07"
+name = "flaretools"
+main = "worker/index.js"
+compatibility_date = "2026-10-04"
+workers_dev = true
+# Optional: bind a domain in your Cloudflare account.
+# routes = [{ pattern = "tools.example.com", custom_domain = true }]
 
-# D1 Database binding for temporary text-share and WebRTC signaling rooms
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api", "/api/*"]
+
+[[durable_objects.bindings]]
+name = "TEXT_ROOMS"
+class_name = "TextRoom"
+
+[[durable_objects.bindings]]
+name = "TEXT_QUOTAS"
+class_name = "TextQuota"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TextRoom", "TextQuota"]
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+# D1 stores temporary Mock APIs; text sharing uses Durable Objects.
 # 1. Run: npx wrangler d1 create flare-tools-db
 # 2. Copy the generated database_id to database_id below
 # 3. Execute schema: npx wrangler d1 execute flare-tools-db --remote --file=./schema.sql

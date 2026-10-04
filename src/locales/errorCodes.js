@@ -8,11 +8,14 @@ export const API_ERROR_KEYS = Object.freeze({
   MISSING_PARAMETERS: 'api_error_missing_parameters',
   TEXT_TOO_LONG: 'api_error_text_too_long',
   DEVICE_NOT_IN_ROOM: 'api_error_device_not_in_room',
+  VERSION_CONFLICT: 'api_error_version_conflict',
+  ROOM_BUSY: 'api_error_room_busy',
   FORBIDDEN: 'api_error_forbidden',
   RATE_LIMITED: 'api_error_rate_limited',
   METHOD_NOT_ALLOWED: 'api_error_method_not_allowed',
   UNKNOWN_ACTION: 'api_error_unknown_action',
   INTERNAL_ERROR: 'api_error_internal',
+  SERVICE_UNAVAILABLE: 'api_error_service_unavailable',
 });
 
 export function getApiErrorKey(code) {
