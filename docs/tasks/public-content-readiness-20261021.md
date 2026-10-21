@@ -16,7 +16,13 @@ Baseline: origin/main 3844824f7df71a83762eec8ba166fbe0edef2a62. Isolated candida
 
 Known baseline: npm ci reported 7 dependency advisories (2 moderate, 5 high); versions and lockfile are unchanged. Existing TOML stream/eval and chunk-size warnings remain. These checks do not claim a dependency/security audit or all-browser validation.
 
-Release status: not yet pushed or deployed at this record's creation.
+Release: source commit 4024a6b9de74384dd69115c22898db6594d97eec was independently reviewed (PASS, no actionable findings) by a reviewer who did not implement Tools. It was pushed to main under the user's deployment authorization. Cloudflare build b2a874e6-7bd0-4137-8710-9385ac33f58d succeeded, producing version 630cc55a, confirmed ready at 100% traffic.
+
+Production verification on tools.arcinks.com passed: all 14 routes via GET/navigation/HEAD; 26 canonical redirects; robots GET/HEAD with content signal and original path restrictions; all 14 deployed HTML precache revisions matched actual bytes from the same workers.dev deployment. Existing custom-domain WAF still returns 403 for an unknown API. Linux entry chunk hashes and Cloudflare analytics injection differ from local output, so the production comparison normalized only those delivery differences and inter-tag whitespace; local output comparisons remained exact.
+
+Edge verified the real production data-transformer route, TOML date-to-JSON conversion, a unique description and the official canonical URL. The same deployed workers.dev client converted JSON to YAML. A pre-existing tab initially retained the old service worker; leaving and reopening the site activated the new client. An independent read-only check found all 46 precache requests successful and Workbox supports the 14 same-origin HTML redirects. No broader PWA behavior change or security-setting change was required.
+
+This release receipt documents the verified source deployment above. A subsequent documentation-only commit records it; runtime code and validation inputs stay identical.
 
 Browser verification found an existing production defect: @iarna/toml accesses Node global.Date at module load, crashing the data-transformer page. Independent read-only investigation confirmed the production chunk matches the baseline and reproduced the same ReferenceError. The narrow repair maps the Vite global identifier to standard globalThis, without adding a window property, dependencies or polyfills. Date and 64-bit TOML branches are included in verification; JSON BigInt behavior stays unchanged. Vite define semantics were checked against the [current official documentation](https://vite.dev/config/shared-options).
 
