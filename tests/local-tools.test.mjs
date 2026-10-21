@@ -19,6 +19,15 @@ test('data transformer handles empty, valid and invalid input without throwing',
   assert.equal(invalid.output, '');
 });
 
+test('TOML conversion retains dates and 64-bit integers', () => {
+  const dated = transformData({ input: 'date = 1979-05-27\nname = "Arc"', inputType: 'toml', outputType: 'json' });
+  assert.equal(dated.status, 'success');
+  assert.deepEqual(JSON.parse(dated.output), { date: '1979-05-27', name: 'Arc' });
+  const large = transformData({ input: 'value = 9223372036854775807', inputType: 'toml', outputType: 'toml' });
+  assert.equal(large.status, 'success');
+  assert.match(large.output.replaceAll('_', ''), /value = 9223372036854775807/);
+});
+
 test('string processor counts UTF-8 bytes and produces stable encodings', () => {
   const empty = analyzeString('');
   assert.deepEqual(empty.stats, { bytes: 0, chars: 0, lines: 0, words: 0 });

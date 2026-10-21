@@ -120,7 +120,9 @@ npm run deploy
 
 The official Worker is named `flaretools`. Its official site is `https://tools.arcinks.com`, and its default Worker entry at `https://flaretools.arctan.workers.dev` remains enabled. Self-hosted instances should use their own workers.dev address or configure `routes` for their own domain, and allow the corresponding hostname in Turnstile.
 
-For a custom domain, set `VITE_SITE_URL` before building and manually update the site URLs in [`public/sitemap.xml`](./public/sitemap.xml), [`public/robots.txt`](./public/robots.txt), and the WebSite JSON-LD `url` in [`index.html`](./index.html). `VITE_SITE_URL` affects SEO / page links; it does not rewrite that static content.
+The build emits separate static HTML for the existing home, about and 12 tool routes, with matching titles, descriptions, canonical URLs and no-JavaScript descriptions. The existing React client handles interactions and language switching. Pages are generated before PWA precaching; API routing and access to shared content stay unchanged. `robots.txt` permits search and AI input, declares AI training disallowed, and retains the `/api/` crawl restriction. Content signals do not replace authentication.
+
+For a custom domain, set `VITE_SITE_URL` before building. Generated canonical URLs, Open Graph URLs and WebSite JSON-LD use that domain. Manually update the site URLs in [`public/sitemap.xml`](./public/sitemap.xml) and [`public/robots.txt`](./public/robots.txt); [`index.html`](./index.html) retains a generic development shell.
 
 This version does not import temporary text rooms from an older deployment. Copy any text you still need before switching instances; rooms on the old instance expire under their original policy.
 

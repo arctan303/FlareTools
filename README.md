@@ -120,7 +120,9 @@ npm run deploy
 
 官方 Worker 名称为 `flaretools`，官方站点为 `https://tools.arcinks.com`，Worker 默认入口 `https://flaretools.arctan.workers.dev` 也保持启用。自建实例请使用自己的 workers.dev 地址或通过 `routes` 绑定自己的域名，并配置相应的 Turnstile 域名。
 
-自定义域名时，构建前设置 `VITE_SITE_URL`，并手动更新 [`public/sitemap.xml`](./public/sitemap.xml)、[`public/robots.txt`](./public/robots.txt) 中的站点地址，以及 [`index.html`](./index.html) 内 WebSite JSON-LD 的 `url`。`VITE_SITE_URL` 影响 SEO / 页面链接，不会自动重写这些静态内容。
+构建会为现有首页、关于和12个工具路由生成独立静态HTML，包含对应标题、简介、canonical及无JavaScript说明；交互和语言切换仍由原React客户端处理。构建在PWA预缓存前完成，不改变API路由或分享内容的访问权限。`robots.txt` 声明允许搜索和AI输入、禁止训练，并保留 `/api/` 抓取限制；内容信号不代替鉴权。
+
+自定义域名时，构建前设置 `VITE_SITE_URL`；生成页面的canonical、Open Graph URL与WebSite JSON-LD会使用该域名。仍需手动更新 [`public/sitemap.xml`](./public/sitemap.xml)、[`public/robots.txt`](./public/robots.txt) 中的站点地址；开发用的 [`index.html`](./index.html) 保留通用占位内容。
 
 本版本不导入旧部署的临时文本房间。切换实例前可手动复制仍需保留的文本，原实例中的房间按原有效期到期。
 

@@ -1,11 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { publicPagesPlugin } from './scripts/public-pages.mjs'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // @iarna/toml references Node's global for Date, BigInt and optional Buffer.
+  define: { global: 'globalThis' },
   plugins: [
     react(),
+    publicPagesPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       workbox: { navigateFallbackDenylist: [/^\/api(?:\/|$)/] },

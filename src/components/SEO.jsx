@@ -1,8 +1,15 @@
+import { useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { useI18n } from '../contexts/I18nContext';
 
 export default function SEO({ title, description, titleKey, descriptionKey, robots }) {
+  // React 19 hoists client metadata; createRoot does not own the prebuilt head.
+  // Retire only the initial tags once this page's client metadata takes over.
+  useLayoutEffect(() => {
+    document.head.querySelectorAll('[data-static-seo]').forEach((tag) => tag.remove());
+  }, []);
+
   const { lang, t } = useI18n();
   const { pathname } = useLocation();
 
